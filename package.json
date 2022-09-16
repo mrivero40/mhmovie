@@ -1,0 +1,19 @@
+{
+  "name": "mhmovie",
+  "version": "1.0.0",
+  "description": "Contenido multimedia online con API REST y JavaScript",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mrivero40/mhmovie.git"
+  },
+  "author": "@mrivero40",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mrivero40/mhmovie/issues"
+  },
+  "homepage": "https://github.com/mrivero40/mhmovie#readme"
+}
