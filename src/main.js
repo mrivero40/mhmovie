@@ -31,7 +31,7 @@ async function getTrendingMoviesPreview() {
         trendingPreviewMoviesContainer.appendChild(movieContainer);
     });
 };
-getTrendingMoviesPreview();
+
 
 async function getGenresPreview() {
     const { data } = await api(ENDPOINT_GENRES);
@@ -53,4 +53,3 @@ async function getGenresPreview() {
         previewCategoriesContainer.appendChild(categoryContainer);
     });
 };
-getGenresPreview();
