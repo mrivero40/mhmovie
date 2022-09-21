@@ -1,7 +1,6 @@
 const $ = (id) => 
     document.querySelector(id);
 
-
 const headerSection = $('#header');
 const arrowBtn = $('.header-arrow');
 const headerTitle = $('.header-title');
