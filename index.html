@@ -14,13 +14,13 @@
 </head>
 <body>
   <header id="header" class="header-container">
-    <span class="header-arrow inactive">&lt;</span>
+    <span class="header-arrow">&lt;</span>
     <h1 class="header-title">mhMovies</h1>
     <h1 class="header-title header-title--categoryView inactive">Acción</h1>
 
     <form id="searchForm" class="header-searchForm">
-      <input type="text" placeholder="Vengadores" />
-      <button>🔍</button>
+      <input type="text" placeholder="Mendohardware" />
+      <button id="searchBtn">🔍</button>
     </form>
   </header>
 
@@ -63,21 +63,6 @@
       />
     </div>
 
-    <div class="movie-container">
-      <img
-        src="https://image.tmdb.org/t/p/w300/adOzdWS35KAo21r9R4BuFCkLer6.jpg"
-        class="movie-img"
-        alt="Nombre de la película"
-      />
-    </div>
-
-    <div class="movie-container">
-      <img
-        src="https://image.tmdb.org/t/p/w300/adOzdWS35KAo21r9R4BuFCkLer6.jpg"
-        class="movie-img"
-        alt="Nombre de la película"
-      />
-    </div>
   </section>
 
   <section id="movieDetail" class="movieDetail-container inactive">
@@ -111,23 +96,8 @@
             class="movie-img"
             alt="Nombre de la película"
           />
-        </div>
+        </div>        
         
-        <div class="movie-container">
-          <img
-            src="https://image.tmdb.org/t/p/w300/adOzdWS35KAo21r9R4BuFCkLer6.jpg"
-            class="movie-img"
-            alt="Nombre de la película"
-          />
-        </div>
-        
-        <div class="movie-container">
-          <img
-            src="https://image.tmdb.org/t/p/w300/adOzdWS35KAo21r9R4BuFCkLer6.jpg"
-            class="movie-img"
-            alt="Nombre de la película"
-          />
-        </div>
       </div>
     </article>
   </section>
@@ -136,6 +106,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="./src/secrets.js"></script>
+  <script src="./src/nodes.js"></script>
   <script src="./src/main.js"></script>
   <script src="./src/navigation.js"></script>
 </body>
