@@ -11,6 +11,7 @@ const ENDPOINT_TRENDING = `trending/movie/day`;
 const URL_IMG = 'https://image.tmdb.org/t/p/w300';
 const ENDPOINT_GENRES = `genre/movie/list`;
 const ENDPOINT_GENRES_LIST = `discover/movie`;
+const ENDPOINT_SEARCH = 'search/movie';
 
 // utils
 
@@ -119,4 +120,10 @@ function getMoviesByCategory(id) {
         movieContainer.appendChild(movieImg);
         genericSection.appendChild(movieContainer);
     });*/
+};
+
+function getMoviesBySearch(query) {
+    createMovies(ENDPOINT_SEARCH, genericSection, {
+        params: {query},
+    });
 };
