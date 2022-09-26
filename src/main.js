@@ -5,6 +5,7 @@ const api = axios.create({
     },
     params: {
         'api_key': API_KEY,
+        'language': 'es-AR',
     },
 });
 const ENDPOINT_TRENDING = `trending/movie/day`;
@@ -22,6 +23,9 @@ async function createMovies(endpoint, container, config={}) {
     movies.forEach(movie => {
         const movieContainer = document.createElement('div');
         movieContainer.classList.add('movie-container');
+        movieContainer.addEventListener('click', () => {
+            location.hash = `movie=${movie.id}`;
+        });
         const movieImg = document.createElement('img');
         movieImg.classList.add('movie-img');
         movieImg.setAttribute('alt', movie.title);
@@ -126,4 +130,31 @@ function getMoviesBySearch(query) {
     createMovies(ENDPOINT_SEARCH, genericSection, {
         params: {query},
     });
+};
+
+function getTrendingMovies() {
+    createMovies(ENDPOINT_TRENDING, genericSection);
+};
+
+async function getMovieById(id) {
+    const { data: movie } = await api(`movie/${id}`);
+
+    const movieImgUrl = `${URL_IMG}${movie.poster_path}`;
+    console.log(movieImgUrl);
+    headerSection.style.background = `
+        linear-gradient(180deg, rgba(0, 0, 0, 0.35) 19.27%, rgba(0, 0, 0, 0) 29.17%),
+        url(${movieImgUrl})
+    `;
+
+    movieDetailTitle.textContent = movie.title;
+    movieDetailScore.textContent = movie.vote_average;
+    movieDetailDescription.textContent = movie.overview;
+
+    createCategories(`movie/${id}`, movieDetailCategoriesList);
+    getRelatedMoviesId(id)
+};
+
+async function getRelatedMoviesId(id) {
+    createMovies(`movie/${id}/similar`, relatedMoviesContainer);
+    relatedMoviesContainer.scrollTo(0,0);
 };
