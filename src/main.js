@@ -16,7 +16,17 @@ const ENDPOINT_SEARCH = 'search/movie';
 
 // utils
 
-async function createMovies(endpoint, container, config={}) {
+const lazyLoader = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+        if(entry.isIntersecting) {
+        const url = entry.target.getAttribute('data-img');
+        entry.target.setAttribute('src', url);
+        }
+        
+    });
+});
+
+async function createMovies(endpoint, container, config={}, lazyLoad = false) {
     const { data } = await api(endpoint, config);
     const movies = data.results;
     container.innerText = '';
@@ -29,10 +39,19 @@ async function createMovies(endpoint, container, config={}) {
         const movieImg = document.createElement('img');
         movieImg.classList.add('movie-img');
         movieImg.setAttribute('alt', movie.title);
-        movieImg.setAttribute('src', `${URL_IMG}${movie.poster_path}`);
+        movieImg.setAttribute(
+            lazyLoad ? 'data-img' : 'src',
+            `${URL_IMG}${movie.poster_path}`);
+        movieImg.addEventListener('error', () => {
+            movieImg.setAttribute('src', `https://via.placeholder.com/300x450/5c218a/fff?text=${movie.title}`);
+        });
         movieContainer.appendChild(movieImg);
         container.appendChild(movieContainer);
-    });
+        
+        if(lazyLoad) {
+            lazyLoader.observe(movieImg);
+        };
+    });    
 };
 
 async function createCategories(endpoint, container) {
@@ -60,7 +79,7 @@ async function createCategories(endpoint, container) {
 // llamados API
 
 function getTrendingMoviesPreview() {
-    createMovies(ENDPOINT_TRENDING, trendingMoviesPreviewList);
+    createMovies(ENDPOINT_TRENDING, trendingMoviesPreviewList, {}, true);
     /*const { data } = await api(ENDPOINT_TRENDING);
     const movies = data.results;
     trendingMoviesPreviewList.innerText = '';
@@ -129,11 +148,11 @@ function getMoviesByCategory(id) {
 function getMoviesBySearch(query) {
     createMovies(ENDPOINT_SEARCH, genericSection, {
         params: {query},
-    });
+    }, true);
 };
 
 function getTrendingMovies() {
-    createMovies(ENDPOINT_TRENDING, genericSection);
+    createMovies(ENDPOINT_TRENDING, genericSection, {}, true);
 };
 
 async function getMovieById(id) {
