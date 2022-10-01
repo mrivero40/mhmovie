@@ -21,15 +21,27 @@ const lazyLoader = new IntersectionObserver((entries) => {
         if(entry.isIntersecting) {
         const url = entry.target.getAttribute('data-img');
         entry.target.setAttribute('src', url);
-        }
-        
+        }        
     });
 });
 
-async function createMovies(endpoint, container, config={}, lazyLoad = false) {
+let page = 2;
+async function createMovies(
+    endpoint,
+    container,
+    config = {},
+    { 
+        lazyLoad = false,
+        clean = true,
+    } = {},
+) {
+
     const { data } = await api(endpoint, config);
     const movies = data.results;
-    container.innerText = '';
+    if (clean) {
+        container.innerText = '';
+    }
+
     movies.forEach(movie => {
         const movieContainer = document.createElement('div');
         movieContainer.classList.add('movie-container');
@@ -46,11 +58,26 @@ async function createMovies(endpoint, container, config={}, lazyLoad = false) {
             movieImg.setAttribute('src', `https://via.placeholder.com/300x450/5c218a/fff?text=${movie.title}`);
         });
         movieContainer.appendChild(movieImg);
-        container.appendChild(movieContainer);
+        container.appendChild(movieContainer);        
         
         if(lazyLoad) {
             lazyLoader.observe(movieImg);
         };
+    });
+
+    const btnLoadMore = document.createElement('button');
+    btnLoadMore.innerText = 'cargar más';
+    genericSection.appendChild(btnLoadMore);
+    btnLoadMore.addEventListener('click', () => {
+        btnLoadMore.remove();
+        createMovies(ENDPOINT_TRENDING, genericSection, {
+            params: {
+                page: page++,
+            },
+        }, {
+                lazyLoad: true,
+                clean: false,
+        });  
     });    
 };
 
@@ -151,8 +178,20 @@ function getMoviesBySearch(query) {
     }, true);
 };
 
-function getTrendingMovies() {
-    createMovies(ENDPOINT_TRENDING, genericSection, {}, true);
+function getTrendingMovies() {    
+    createMovies(ENDPOINT_TRENDING, genericSection, {}, { lazyLoad: true, clean: true,});
+
+    /*btn.addEventListener('click', () => {        
+        createMovies(ENDPOINT_TRENDING, genericSection, {
+            params: {
+                page: page++,
+            },
+        }, {
+            lazyLoad: true,
+            clean: false,
+        });
+        
+    });    */
 };
 
 async function getMovieById(id) {
