@@ -25,7 +25,8 @@ const lazyLoader = new IntersectionObserver((entries) => {
     });
 });
 
-let page = 2;
+
+
 async function createMovies(
     endpoint,
     container,
@@ -35,9 +36,10 @@ async function createMovies(
         clean = true,
     } = {},
 ) {
-
     const { data } = await api(endpoint, config);
     const movies = data.results;
+    maxPage = data.total_pages;
+    console.log(maxPage);
     if (clean) {
         container.innerText = '';
     }
@@ -63,22 +65,8 @@ async function createMovies(
         if(lazyLoad) {
             lazyLoader.observe(movieImg);
         };
-    });
-
-    const btnLoadMore = document.createElement('button');
-    btnLoadMore.innerText = 'cargar más';
-    genericSection.appendChild(btnLoadMore);
-    btnLoadMore.addEventListener('click', () => {
-        btnLoadMore.remove();
-        createMovies(ENDPOINT_TRENDING, genericSection, {
-            params: {
-                page: page++,
-            },
-        }, {
-                lazyLoad: true,
-                clean: false,
-        });  
     });    
+    
 };
 
 async function createCategories(endpoint, container) {
@@ -103,85 +91,86 @@ async function createCategories(endpoint, container) {
     });
 };
 
+
 // llamados API
 
 function getTrendingMoviesPreview() {
-    createMovies(ENDPOINT_TRENDING, trendingMoviesPreviewList, {}, true);
-    /*const { data } = await api(ENDPOINT_TRENDING);
-    const movies = data.results;
-    trendingMoviesPreviewList.innerText = '';
-    movies.forEach(movie => {
-        const movieContainer = document.createElement('div');
-        movieContainer.classList.add('movie-container');
-
-        const movieImg = document.createElement('img');
-        movieImg.classList.add('movie-img');
-        movieImg.setAttribute('alt', movie.title);
-        movieImg.setAttribute('src', `${URL_IMG}${movie.poster_path}`);
-
-        movieContainer.appendChild(movieImg);
-        trendingMoviesPreviewList.appendChild(movieContainer);
-    });*/
+    createMovies(ENDPOINT_TRENDING, trendingMoviesPreviewList, {}, { lazyLoad: true, clean: true});
 };
 
 function getGenresPreview() {
-    createCategories(ENDPOINT_GENRES, categoriesPreviewList);
-    /*const { data } = await api(ENDPOINT_GENRES);
-    const categories = data.genres;
-    categoriesPreviewList.innerText = '';
-    categories.forEach(category => {
-        const categoryContainer = document.createElement('div');
-        categoryContainer.classList.add('category-container');
-        const categoryTitle = document.createElement('h3');
-        categoryTitle.classList.add('category-title');
-        categoryTitle.setAttribute('id', `id${category.id}`);
-        categoryTitle.addEventListener('click', () => {
-            location.hash = `#category=${category.id}-${category.name}`;
-        });
-        const categoryTitleText = document.createTextNode(category.name);
-        categoryTitle.appendChild(categoryTitleText);
-        categoryContainer.appendChild(categoryTitle);
-        categoriesPreviewList.appendChild(categoryContainer);
-    });*/
+    createCategories(ENDPOINT_GENRES, categoriesPreviewList);    
 };
 
 function getMoviesByCategory(id) {
     createMovies(ENDPOINT_GENRES_LIST, genericSection, {
         params: {
             with_genres: id,
-        },
-    });
-    /*const { data } = await api(ENDPOINT_GENRES_LIST, {
-        params: {
-            with_genres: id,
-        },
-    });
-    const movies = data.results;
-    genericSection.innerText = '';    
-    movies.forEach(movie => {
-        const movieContainer = document.createElement('div');
-        movieContainer.classList.add('movie-container');
-
-        const movieImg = document.createElement('img');
-        movieImg.classList.add('movie-img');
-        movieImg.setAttribute('alt', movie.title);
-        movieImg.setAttribute('src', `${URL_IMG}${movie.poster_path}`);
-
-        movieContainer.appendChild(movieImg);
-        genericSection.appendChild(movieContainer);
-    });*/
+        },        
+    },
+    {
+        lazyLoad: true,
+        clean: true,
+    },);
 };
+
+function getPaginatedMoviesByCategory(id) {
+    return async () => {
+        const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+        const scrollIsBottom = ( scrollTop + clientHeight) >= ( scrollHeight - 5 );
+        const pageIsNotMax = page < maxPage;
+        if (scrollIsBottom && pageIsNotMax) {
+        createMovies(ENDPOINT_GENRES_LIST, genericSection, {
+            params: {
+                page: page++,
+                with_genres: id,
+            },
+        }, {
+            lazyLoad: true,
+            clean: false,
+        },);
+        };
+    };
+};
+
 
 function getMoviesBySearch(query) {
     createMovies(ENDPOINT_SEARCH, genericSection, {
         params: {query},
-    }, true);
+    }, {
+        lazyLoad: true,
+        clean: true,
+    },);
+};
+
+function getPaginatedMoviesBySearch(query) {
+    return async () => {
+        const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+        const scrollIsBottom = ( scrollTop + clientHeight) >= ( scrollHeight - 5 );
+        const pageIsNotMax = page < maxPage;
+        if (scrollIsBottom && pageIsNotMax) {
+            createMovies(ENDPOINT_SEARCH, genericSection, {
+                params: {
+                    page: page++,
+                    query,
+                },
+            }, {
+                lazyLoad: true,
+                clean: false,
+            },);
+        };
+    };
 };
 
 function getTrendingMovies() {    
-    createMovies(ENDPOINT_TRENDING, genericSection, {}, { lazyLoad: true, clean: true,});
+    createMovies(ENDPOINT_TRENDING, genericSection, {}, { lazyLoad: true, clean: true,});    
+};
 
-    /*btn.addEventListener('click', () => {        
+function getPaginatedTrendingMovies() {
+    const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+    const scrollIsBottom = ( scrollTop + clientHeight) >= ( scrollHeight - 5 );
+    const pageIsNotMax = page < maxPage;
+    if (scrollIsBottom && pageIsNotMax) {
         createMovies(ENDPOINT_TRENDING, genericSection, {
             params: {
                 page: page++,
@@ -189,9 +178,8 @@ function getTrendingMovies() {
         }, {
             lazyLoad: true,
             clean: false,
-        });
-        
-    });    */
+        },);
+    };
 };
 
 async function getMovieById(id) {
@@ -213,6 +201,6 @@ async function getMovieById(id) {
 };
 
 async function getRelatedMoviesId(id) {
-    createMovies(`movie/${id}/similar`, relatedMoviesContainer);
+    createMovies(`movie/${id}/similar`, relatedMoviesContainer, {}, { lazyLoad: true, clean: true});
     relatedMoviesContainer.scrollTo(0,0);
 };
