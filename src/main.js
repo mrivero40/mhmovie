@@ -1,3 +1,5 @@
+// data
+
 const api = axios.create({
     baseURL: 'https://api.themoviedb.org/3/',
     headers: {
@@ -13,6 +15,28 @@ const URL_IMG = 'https://image.tmdb.org/t/p/w300';
 const ENDPOINT_GENRES = `genre/movie/list`;
 const ENDPOINT_GENRES_LIST = `discover/movie`;
 const ENDPOINT_SEARCH = 'search/movie';
+
+function likedMoviesList() {
+    const item = JSON.parse(localStorage.getItem('liked_movies'));
+    let movies;
+    if (item) {
+        movies = item;
+    } else {
+        movies = {};
+    }
+    return movies;
+};
+
+function likeMovie(movie) {
+    const likedMovies = likedMoviesList();
+
+    if (likedMovies[movie.id]) {
+        likedMovies[movie.id] = undefined;
+    } else {
+        likedMovies[movie.id] = movie;
+    };
+    localStorage.setItem('liked_movies', JSON.stringify(likedMovies));
+};
 
 // utils
 
@@ -47,9 +71,7 @@ async function createMovies(
     movies.forEach(movie => {
         const movieContainer = document.createElement('div');
         movieContainer.classList.add('movie-container');
-        movieContainer.addEventListener('click', () => {
-            location.hash = `movie=${movie.id}`;
-        });
+        
         const movieImg = document.createElement('img');
         movieImg.classList.add('movie-img');
         movieImg.setAttribute('alt', movie.title);
@@ -59,7 +81,19 @@ async function createMovies(
         movieImg.addEventListener('error', () => {
             movieImg.setAttribute('src', `https://via.placeholder.com/300x450/5c218a/fff?text=${movie.title}`);
         });
+        movieImg.addEventListener('click', () => {
+            location.hash = `movie=${movie.id}`;
+        });
+
+        const movieBtn = document.createElement('button');
+        movieBtn.classList.add('movie-btn');
+        movieBtn.addEventListener('click', () => {
+            movieBtn.classList.toggle('movie-btn--liked');
+            likeMovie(movie);
+        });
+
         movieContainer.appendChild(movieImg);
+        movieContainer.appendChild(movieBtn);
         container.appendChild(movieContainer);        
         
         if(lazyLoad) {
