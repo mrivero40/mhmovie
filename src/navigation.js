@@ -1,6 +1,12 @@
 let maxPage;
 let page = 2;
 let infiniteScroll;
+/*let lang = 'es';
+
+language.addEventListener('click', () => {
+    lang = language.value;
+    homePage();
+});*/
 
 searchFormBtn.addEventListener('click', () => {
     location.hash = `#search=${searchFormInput.value}`;
@@ -60,9 +66,12 @@ function homePage() {
     categoriesPreviewSection.classList.remove('inactive');
     genericSection.classList.add('inactive');
     movieDetailSection.classList.add('inactive');
+    likedMoviesSection.classList.remove('inactive');
+    selectLanguageSection.classList.remove('inactive')
 
     getTrendingMoviesPreview();
     getGenresPreview();
+    getLikedMovies();
 };
 
 function categoriesPage() {
@@ -80,6 +89,8 @@ function categoriesPage() {
     categoriesPreviewSection.classList.add('inactive');
     genericSection.classList.remove('inactive');
     movieDetailSection.classList.add('inactive');
+    likedMoviesSection.classList.add('inactive');
+    selectLanguageSection.classList.add('inactive');
 
     const [_, categoryData] = location.hash.split('=');
     const [categoryId, categoryName] = categoryData.split('-');
@@ -106,6 +117,8 @@ function movieDetailPage() {
     categoriesPreviewSection.classList.add('inactive');
     genericSection.classList.add('inactive');
     movieDetailSection.classList.remove('inactive');
+    likedMoviesSection.classList.add('inactive');
+    selectLanguageSection.classList.add('inactive');
 
     const [_, movieId] = location.hash.split('=');
 
@@ -127,6 +140,8 @@ function searchPage() {
     categoriesPreviewSection.classList.add('inactive');
     genericSection.classList.remove('inactive');
     movieDetailSection.classList.add('inactive');
+    likedMoviesSection.classList.add('inactive');
+    selectLanguageSection.classList.add('inactive');
 
     const [_, query] = location.hash.split('=');
     getMoviesBySearch(query);
@@ -149,6 +164,8 @@ function trendsPage() {
     categoriesPreviewSection.classList.add('inactive');
     genericSection.classList.remove('inactive');
     movieDetailSection.classList.add('inactive');
+    likedMoviesSection.classList.add('inactive');
+    selectLanguageSection.classList.add('inactive');
 
     headerCategoryTitle.innerText = 'Tendencias';
 

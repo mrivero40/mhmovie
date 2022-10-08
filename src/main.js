@@ -1,4 +1,10 @@
 // data
+let lang = navigator.language;
+
+selectLanguageSection.addEventListener('change', () => {
+    lang = selectLanguageSection.value;
+    homePage();
+});
 
 const api = axios.create({
     baseURL: 'https://api.themoviedb.org/3/',
@@ -7,7 +13,7 @@ const api = axios.create({
     },
     params: {
         'api_key': API_KEY,
-        'language': 'es-AR',
+        'language': lang,
     },
 });
 const ENDPOINT_TRENDING = `trending/movie/day`;
@@ -29,6 +35,7 @@ function likedMoviesList() {
 
 function likeMovie(movie) {
     const likedMovies = likedMoviesList();
+    console.log(likedMovies);
 
     if (likedMovies[movie.id]) {
         likedMovies[movie.id] = undefined;
@@ -43,13 +50,11 @@ function likeMovie(movie) {
 const lazyLoader = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
         if(entry.isIntersecting) {
-        const url = entry.target.getAttribute('data-img');
-        entry.target.setAttribute('src', url);
-        }        
+            const url = entry.target.getAttribute('data-img');
+            entry.target.setAttribute('src', url);
+        };
     });
 });
-
-
 
 async function createMovies(
     endpoint,
@@ -77,7 +82,8 @@ async function createMovies(
         movieImg.setAttribute('alt', movie.title);
         movieImg.setAttribute(
             lazyLoad ? 'data-img' : 'src',
-            `${URL_IMG}${movie.poster_path}`);
+            `${URL_IMG}${movie.poster_path}`
+        );
         movieImg.addEventListener('error', () => {
             movieImg.setAttribute('src', `https://via.placeholder.com/300x450/5c218a/fff?text=${movie.title}`);
         });
@@ -87,9 +93,11 @@ async function createMovies(
 
         const movieBtn = document.createElement('button');
         movieBtn.classList.add('movie-btn');
+        likedMoviesList()[movie.id] && movieBtn.classList.add('movie-btn--liked');
         movieBtn.addEventListener('click', () => {
             movieBtn.classList.toggle('movie-btn--liked');
             likeMovie(movie);
+            getLikedMovies();
         });
 
         movieContainer.appendChild(movieImg);
@@ -100,11 +108,10 @@ async function createMovies(
             lazyLoader.observe(movieImg);
         };
     });    
-    
 };
 
-async function createCategories(endpoint, container) {
-    const { data } = await api(endpoint);
+async function createCategories(endpoint, container, config = {}) {
+    const { data } = await api(endpoint, config);
     const categories = data.genres;
     container.innerText = '';
     categories.forEach(category => {
@@ -129,23 +136,48 @@ async function createCategories(endpoint, container) {
 // llamados API
 
 function getTrendingMoviesPreview() {
-    createMovies(ENDPOINT_TRENDING, trendingMoviesPreviewList, {}, { lazyLoad: true, clean: true});
+    createMovies(
+        ENDPOINT_TRENDING,
+        trendingMoviesPreviewList,
+        {
+            params: {
+                'language': lang,
+            },
+        },
+        {
+            lazyLoad: true,
+            clean: true,
+        },
+    );
 };
 
 function getGenresPreview() {
-    createCategories(ENDPOINT_GENRES, categoriesPreviewList);    
+    createCategories(
+        ENDPOINT_GENRES,
+        categoriesPreviewList,
+        {
+            params: {
+                'language': lang,
+            },
+        },
+    );    
 };
 
 function getMoviesByCategory(id) {
-    createMovies(ENDPOINT_GENRES_LIST, genericSection, {
-        params: {
-            with_genres: id,
-        },        
-    },
-    {
-        lazyLoad: true,
-        clean: true,
-    },);
+    createMovies(
+        ENDPOINT_GENRES_LIST,
+        genericSection,
+        {
+            params: {
+                with_genres: id,
+                'language': lang,
+            },
+        },    
+        {
+            lazyLoad: true,
+            clean: true,
+        },
+    );
 };
 
 function getPaginatedMoviesByCategory(id) {
@@ -154,27 +186,39 @@ function getPaginatedMoviesByCategory(id) {
         const scrollIsBottom = ( scrollTop + clientHeight) >= ( scrollHeight - 5 );
         const pageIsNotMax = page < maxPage;
         if (scrollIsBottom && pageIsNotMax) {
-        createMovies(ENDPOINT_GENRES_LIST, genericSection, {
-            params: {
-                page: page++,
-                with_genres: id,
-            },
-        }, {
-            lazyLoad: true,
-            clean: false,
-        },);
+            createMovies(
+                ENDPOINT_GENRES_LIST,
+                genericSection,
+                {
+                    params: {
+                        page: page++,
+                        with_genres: id,
+                        'language': lang,
+                    },
+                },
+                {
+                    lazyLoad: true,
+                    clean: false,
+                },
+            );
         };
     };
 };
 
 
 function getMoviesBySearch(query) {
-    createMovies(ENDPOINT_SEARCH, genericSection, {
-        params: {query},
-    }, {
-        lazyLoad: true,
-        clean: true,
-    },);
+    createMovies(
+        ENDPOINT_SEARCH,
+        genericSection,
+        {
+            params: {query},
+            'language': lang,
+        },
+        {
+            lazyLoad: true,
+            clean: true,
+        },
+    );
 };
 
 function getPaginatedMoviesBySearch(query) {
@@ -183,21 +227,38 @@ function getPaginatedMoviesBySearch(query) {
         const scrollIsBottom = ( scrollTop + clientHeight) >= ( scrollHeight - 5 );
         const pageIsNotMax = page < maxPage;
         if (scrollIsBottom && pageIsNotMax) {
-            createMovies(ENDPOINT_SEARCH, genericSection, {
-                params: {
-                    page: page++,
-                    query,
+            createMovies(
+                ENDPOINT_SEARCH,
+                genericSection,
+                {
+                    params: {
+                        page: page++,
+                        query,
+                        'language': lang,
+                    },
+                }, {
+                    lazyLoad: true,
+                    clean: false,
                 },
-            }, {
-                lazyLoad: true,
-                clean: false,
-            },);
+            );
         };
     };
 };
 
 function getTrendingMovies() {    
-    createMovies(ENDPOINT_TRENDING, genericSection, {}, { lazyLoad: true, clean: true,});    
+    createMovies(
+        ENDPOINT_TRENDING,
+        genericSection,
+        {
+            params: {
+                'language': lang,
+            },
+        },
+        {
+            lazyLoad: true,
+            clean: true,
+        },
+    );    
 };
 
 function getPaginatedTrendingMovies() {
@@ -205,19 +266,31 @@ function getPaginatedTrendingMovies() {
     const scrollIsBottom = ( scrollTop + clientHeight) >= ( scrollHeight - 5 );
     const pageIsNotMax = page < maxPage;
     if (scrollIsBottom && pageIsNotMax) {
-        createMovies(ENDPOINT_TRENDING, genericSection, {
-            params: {
-                page: page++,
-            },
-        }, {
+        createMovies(
+            ENDPOINT_TRENDING,
+            genericSection,
+            {
+                params: {
+                    page: page++,
+                    'language': lang,
+                },
+            }, {
             lazyLoad: true,
             clean: false,
-        },);
+            },
+        );
     };
 };
 
 async function getMovieById(id) {
-    const { data: movie } = await api(`movie/${id}`);
+    const { data: movie } = await api(
+        `movie/${id}`,
+        {
+            params: {
+                'language': lang,
+            },
+        },
+    );
 
     const movieImgUrl = `${URL_IMG}${movie.poster_path}`;
     console.log(movieImgUrl);
@@ -230,11 +303,69 @@ async function getMovieById(id) {
     movieDetailScore.textContent = movie.vote_average;
     movieDetailDescription.textContent = movie.overview;
 
-    createCategories(`movie/${id}`, movieDetailCategoriesList);
+    createCategories(
+        `movie/${id}`,
+        movieDetailCategoriesList,
+        {
+            params: {
+                'language': lang,
+            },
+        },
+    );
     getRelatedMoviesId(id)
 };
 
 async function getRelatedMoviesId(id) {
-    createMovies(`movie/${id}/similar`, relatedMoviesContainer, {}, { lazyLoad: true, clean: true});
+    createMovies(
+        `movie/${id}/similar`,
+        relatedMoviesContainer,
+        {
+            params: {
+                'language': lang,
+            },
+        },
+        {
+            lazyLoad: true,
+            clean: true
+        },
+    );
     relatedMoviesContainer.scrollTo(0,0);
+};
+
+function getLikedMovies() {
+    const likedMovies = likedMoviesList();
+    const moviesArray = Object.values(likedMovies);
+    lazyLoad = true;        
+    const movies = moviesArray;
+    likedMoviesListArticle.innerText = '';
+    
+    movies.forEach(movie => {
+        const movieContainer = document.createElement('div');
+        movieContainer.classList.add('movie-container');            
+        const movieImg = document.createElement('img');
+        movieImg.classList.add('movie-img');
+        movieImg.setAttribute('alt', movie.title);
+        movieImg.setAttribute(
+            lazyLoad ? 'data-img' : 'src',
+            `${URL_IMG}${movie.poster_path}`);
+        movieImg.addEventListener('error', () => {
+            movieImg.setAttribute('src', `https://via.placeholder.com/300x450/5c218a/fff?text=${movie.title}`);
+        });
+        movieImg.addEventListener('click', () => {
+            location.hash = `movie=${movie.id}`;
+        });    
+        const movieBtn = document.createElement('button');
+        movieBtn.classList.add('movie-btn');
+        likedMoviesList()[movie.id] && movieBtn.classList.add('movie-btn--liked');
+        movieBtn.addEventListener('click', () => {
+            movieBtn.classList.toggle('movie-btn--liked');
+            likeMovie(movie);
+            getLikedMovies();
+        });    
+        movieContainer.appendChild(movieImg);
+        movieContainer.appendChild(movieBtn);
+        likedMoviesListArticle.appendChild(movieContainer);            
+        lazyLoader.observe(movieImg);
+    });
+    console.log(likedMovies);
 };

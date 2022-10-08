@@ -25,3 +25,6 @@ const movieDetailDescription = $('.movieDetail-description');
 const movieDetailCategoriesList = $('#movieDetail .categories-list');
 
 const relatedMoviesContainer = $('.relatedMovies-scrollContainer');
+const likedMoviesListArticle = $('.liked-movieList');
+const likedMoviesSection = $('#liked');
+const selectLanguageSection = $('#selectLanguage');
